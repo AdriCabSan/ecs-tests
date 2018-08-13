@@ -12,39 +12,55 @@ public class MTax implements Constant {
 
         List<String> errorList = new ArrayList<>();
         List<String> validIds = new ArrayList<>();
-//        List<String> taxCategoryList = MInfoTaxCategory.getTaxCategoryStringList();
         boolean isXTaxListValid = xTaxList != null && xTaxList.size() > 0;
-        boolean hasJustLocalTaxes;
         if(!isXTaxListValid)
             errorList.add("El documento no tiene tasas");
+        List<String> taxCategoryList = MInfoTaxCategory.getTaxCategoryStringList();
+        boolean hasJustLocalTaxes;
             for (XTax tax : xTaxList) {
                 if(tax.getId() != null)
                     validIds.add(tax.getId().toString());
-//                if(tax.getAmount() == null)
-//                    errorList.add("El importe es obligatorio");
-                if(tax.getTax() == null)
-                    errorList.add("El impuesto es obligatorio");
-//                else if(!taxCategoryList.contains(tax.getTax()))
-//                    errorList.add("El impuesto no es un dato valido");
+                if(isXTaxNotValid(errorList, taxCategoryList, tax))
+                    errorList.add("El impuesto no es un dato valido");
                 hasJustLocalTaxes = areLocalTaxesPresent(errorList, tax);
             }
             if(hasJustLocalTaxes)
                 errorList.add("Debe de incluir al menos una tasa no local");
 
-            if(validIds.size() > 0){
-                List<XTax> xt = TaxsByListId(validIds, false);
-                if(xt.size() != validIds.size())
-                    errorList.add("Existen datos no guardados previamente");
-                else{
-                    HashMap<String, XTax> map_taxs = getXTaxHashMap(xt);
-                    for(int i = 0; i < xTaxList.size(); i++){
-                        if(xTaxList.get(i).getId() != null){
-                            setXTaxCreationDate(xTaxList, map_taxs, i);
-                        }
-                    }
-                }
-            }
+        checkValidIds(xTaxList, errorList, validIds);
         return errorList;
+    }
+
+    private static void checkValidIds(List<XTax> xTaxList, List<String> errorList, List<String> validIds) {
+        if(validIds.size() > 0){
+            List<XTax> xt = TaxsByListId(validIds, false);
+            if(xt.size() != validIds.size())
+                errorList.add("Existen datos no guardados previamente");
+            else
+                setXTaxesCreationDates(xTaxList, xt);
+        }
+    }
+
+    private static boolean isXTaxNotValid(List<String> errorList, List<String> taxCategoryList, XTax tax) {
+        return !taxCategoryList.contains(tax.getTax()) && isXTaxNotEntered(errorList,tax);
+    }
+
+    private static boolean isXTaxNotEntered(List<String> errorList, XTax tax) {
+        boolean isTaxPresent=false;
+        if(tax.getAmount() == null)
+            errorList.add("El importe es obligatorio");
+        if(tax.getTax() == null)
+            errorList.add("El impuesto es obligatorio");
+        else isTaxPresent=true;
+        return isTaxPresent;
+    }
+
+    private static void setXTaxesCreationDates(List<XTax> xTaxList, List<XTax> xt) {
+        HashMap<String, XTax> map_taxs = getXTaxHashMap(xt);
+        for(int i = 0; i < xTaxList.size(); i++)
+            boolean IsXTaxIdNull = xTaxList.get(i).getId() != null;
+            if(IsXTaxIdNull)
+                setXTaxCreationDate(xTaxList, map_taxs, i);
     }
 
     private static void setXTaxCreationDate(List<XTax> xTaxList, HashMap<String, XTax> map_taxes, int i) {
