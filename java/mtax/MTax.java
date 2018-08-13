@@ -8,27 +8,42 @@ public class MTax implements Constant {
 
     }
 
-    public static List<String> validate(List<XTax> xTaxList) {
+    public static List<String> validateXTaxList(List<XTax> xTaxList) {
 
         List<String> errorList = new ArrayList<>();
         List<String> validIds = new ArrayList<>();
-        boolean isXTaxListValid = xTaxList != null && xTaxList.size() > 0;
-        if(!isXTaxListValid)
-            errorList.add("El documento no tiene tasas");
-        List<String> taxCategoryList = MInfoTaxCategory.getTaxCategoryStringList();
-        boolean hasJustLocalTaxes;
-            for (XTax tax : xTaxList) {
-                if(tax.getId() != null)
-                    validIds.add(tax.getId().toString());
-                if(isXTaxNotValid(errorList, taxCategoryList, tax))
-                    errorList.add("El impuesto no es un dato valido");
-                hasJustLocalTaxes = areLocalTaxesPresent(errorList, tax);
-            }
-            if(hasJustLocalTaxes)
-                errorList.add("Debe de incluir al menos una tasa no local");
-
+        if (isXTaxListNotValid(xTaxList, errorList)) return errorList;
+        checkXTaxesValidity(xTaxList, errorList, validIds);
         checkValidIds(xTaxList, errorList, validIds);
         return errorList;
+    }
+
+    private static void checkXTaxesValidity(List<XTax> xTaxList, List<String> errorList, List<String> validIds) {
+        boolean hasJustLocalTaxes = areXTaxesValid(xTaxList, errorList, validIds);
+        if(hasJustLocalTaxes)
+            errorList.add("Debe de incluir al menos una tasa no local");
+    }
+
+    private static boolean areXTaxesValid(List<XTax> xTaxList, List<String> errorList, List<String> validIds) {
+        List<String> taxCategoryList = MInfoTaxCategory.getTaxCategoryStringList();
+        boolean hasJustLocalTaxes;
+        for (XTax tax : xTaxList) {
+            if(tax.getId() != null)
+                validIds.add(tax.getId().toString());
+            if(isXTaxNotValid(errorList, taxCategoryList, tax))
+                errorList.add("El impuesto no es un dato valido");
+            hasJustLocalTaxes = areLocalTaxesPresent(errorList, tax);
+        }
+        return hasJustLocalTaxes;
+    }
+
+    private static boolean isXTaxListNotValid(List<XTax> xTaxList, List<String> errorList) {
+        boolean isXTaxListValid = xTaxList != null && xTaxList.size() > 0;
+        if(!isXTaxListValid) {
+            errorList.add("El documento no tiene tasas");
+            return true;
+        }
+        return false;
     }
 
     private static void checkValidIds(List<XTax> xTaxList, List<String> errorList, List<String> validIds) {
