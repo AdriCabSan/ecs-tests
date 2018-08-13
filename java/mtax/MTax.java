@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -24,9 +25,9 @@ public class MTax implements Constant {
             errorList.add("Debe de incluir al menos una tasa no local");
     }
 
-    private static boolean areXTaxesValid(List<XTax> xTaxList, List<String> errorList, List<String> validIds) {
+    protected static boolean areXTaxesValid(List<XTax> xTaxList, List<String> errorList, List<String> validIds) {
         List<String> taxCategoryList = MInfoTaxCategory.getTaxCategoryStringList();
-        boolean hasJustLocalTaxes;
+        boolean hasJustLocalTaxes = false;
         for (XTax tax : xTaxList) {
             if(tax.getId() != null)
                 validIds.add(tax.getId().toString());
@@ -37,7 +38,7 @@ public class MTax implements Constant {
         return hasJustLocalTaxes;
     }
 
-    private static boolean isXTaxListNotValid(List<XTax> xTaxList, List<String> errorList) {
+    protected static boolean isXTaxListNotValid(List<XTax> xTaxList, List<String> errorList) {
         boolean isXTaxListValid = xTaxList != null && xTaxList.size() > 0;
         if(!isXTaxListValid) {
             errorList.add("El documento no tiene tasas");
@@ -56,11 +57,11 @@ public class MTax implements Constant {
         }
     }
 
-    private static boolean isXTaxNotValid(List<String> errorList, List<String> taxCategoryList, XTax tax) {
+    protected static boolean isXTaxNotValid(List<String> errorList, List<String> taxCategoryList, XTax tax) {
         return !taxCategoryList.contains(tax.getTax()) && isXTaxNotEntered(errorList,tax);
     }
 
-    private static boolean isXTaxNotEntered(List<String> errorList, XTax tax) {
+    protected static boolean isXTaxNotEntered(List<String> errorList, XTax tax) {
         boolean isTaxPresent=false;
         if(tax.getAmount() == null)
             errorList.add("El importe es obligatorio");
@@ -72,10 +73,12 @@ public class MTax implements Constant {
 
     private static void setXTaxesCreationDates(List<XTax> xTaxList, List<XTax> xt) {
         HashMap<String, XTax> map_taxs = getXTaxHashMap(xt);
-        for(int i = 0; i < xTaxList.size(); i++)
-            boolean IsXTaxIdNull = xTaxList.get(i).getId() != null;
-            if(IsXTaxIdNull)
+        boolean IsXTaxIdNull;
+        for(int i = 0; i < xTaxList.size(); i++) {
+            IsXTaxIdNull = xTaxList.get(i).getId() != null;
+            if (IsXTaxIdNull)
                 setXTaxCreationDate(xTaxList, map_taxs, i);
+        }
     }
 
     private static void setXTaxCreationDate(List<XTax> xTaxList, HashMap<String, XTax> map_taxes, int i) {
@@ -84,7 +87,7 @@ public class MTax implements Constant {
                         getValidXTaxCreationDate(xTaxList, map_taxes, i));
     }
 
-    private static boolean areLocalTaxesPresent(List<String> errorList, X_Tax tax) {
+    protected static boolean areLocalTaxesPresent(List<String> errorList, XTax tax) {
         boolean hasJustLocalTaxes = true;
         boolean isTaxAmountPresent = tax.isTrasladado() && tax.getTaxAmount() == null;
         if(!tax.isLocal()){
@@ -98,7 +101,7 @@ public class MTax implements Constant {
         return hasJustLocalTaxes;
     }
 
-    private static HashMap<String, XTax> getXTaxHashMap(List<XTax> xt) {
+    protected static HashMap<String, XTax> getXTaxHashMap(List<XTax> xt) {
         HashMap<String, XTax> map_taxs = new HashMap<String, XTax>();
         for(XTax tax: xt){
             map_taxs.put(tax.getId().toString(), tax);
@@ -106,8 +109,8 @@ public class MTax implements Constant {
         return map_taxs;
     }
 
-    private static Date getValidXTaxCreationDate(List<XTax> xTaxList, HashMap<String, XTax> map_taxs, int i) {
-        return return map_taxes.get(
+    protected static Date getValidXTaxCreationDate(List<XTax> xTaxList, HashMap<String, XTax> map_taxes, int i) {
+         return map_taxes.get(
                 xTaxList.get(i)
                         .getId()
                         .toString()
