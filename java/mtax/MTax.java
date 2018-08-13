@@ -14,10 +14,9 @@ public class MTax implements Constant {
         List<String> validIds = new ArrayList<>();
 //        List<String> taxCategoryList = MInfoTaxCategory.getTaxCategoryStringList();
         boolean isXTaxListValid = xTaxList != null && xTaxList.size() > 0;
-        boolean hasJustLocalTaxes = true;
+        boolean hasJustLocalTaxes;
         if(!isXTaxListValid)
             errorList.add("El documento no tiene tasas");
-
             for (XTax tax : xTaxList) {
                 if(tax.getId() != null)
                     validIds.add(tax.getId().toString());
@@ -25,37 +24,47 @@ public class MTax implements Constant {
 //                    errorList.add("El importe es obligatorio");
                 if(tax.getTax() == null)
                     errorList.add("El impuesto es obligatorio");
-                
 //                else if(!taxCategoryList.contains(tax.getTax()))
 //                    errorList.add("El impuesto no es un dato valido");
-
-                boolean isTaxAmountPresent = tax.isTrasladado() && tax.getTaxAmount() == null;
-                if(!tax.isLocal()){
-                    hasJustLocalTaxes=false;
-                    if(tax.getTaxAmount() == null )
-                        errorList.add("El importe es obligatorio");
-                }
-                else if(isTaxAmountPresent)
-                    errorList.add("El importe es obligatorio");
+                hasJustLocalTaxes = areLocalTaxesPresent(errorList, tax);
             }
-            if(hasJustLocalTaxes){
+            if(hasJustLocalTaxes)
                 errorList.add("Debe de incluir al menos una tasa no local");
-            }
+
             if(validIds.size() > 0){
                 List<XTax> xt = TaxsByListId(validIds, false);
-                if(xt.size() != validIds.size()){
+                if(xt.size() != validIds.size())
                     errorList.add("Existen datos no guardados previamente");
-                }else{
+                else{
                     HashMap<String, XTax> map_taxs = getXTaxHashMap(xt);
                     for(int i = 0; i < xTaxList.size(); i++){
                         if(xTaxList.get(i).getId() != null){
-                            xTaxList.get(i).setCreated(
-                                    getValidXTaxCreationDate(xTaxList, map_taxs, i));
+                            setXTaxCreationDate(xTaxList, map_taxs, i);
                         }
                     }
                 }
             }
         return errorList;
+    }
+
+    private static void setXTaxCreationDate(List<XTax> xTaxList, HashMap<String, XTax> map_taxes, int i) {
+        xTaxList.get(i)
+                .setCreated(
+                        getValidXTaxCreationDate(xTaxList, map_taxes, i));
+    }
+
+    private static boolean areLocalTaxesPresent(List<String> errorList, X_Tax tax) {
+        boolean hasJustLocalTaxes = true;
+        boolean isTaxAmountPresent = tax.isTrasladado() && tax.getTaxAmount() == null;
+        if(!tax.isLocal()){
+            hasJustLocalTaxes=false;
+            if(tax.getTaxAmount() == null )
+                errorList.add("El importe es obligatorio");
+        }
+        else if(isTaxAmountPresent)
+            errorList.add("El importe es obligatorio");
+
+        return hasJustLocalTaxes;
     }
 
     private static HashMap<String, XTax> getXTaxHashMap(List<XTax> xt) {
