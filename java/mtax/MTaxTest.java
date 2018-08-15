@@ -25,6 +25,7 @@ class MTaxTest {
         validIds.add(xTaxList.get(0).toString());
         List<XTax> xt = TaxsByListId(validIds, false);
         taxHashMap.put("1",xTaxList.get(0));
+
     }
 
     @Test
@@ -42,7 +43,7 @@ class MTaxTest {
     @Test
     void isXTaxListNotValidTest() {
         boolean result= mTax.isXTaxListNotValid(xTaxList,errorList);
-        assertEquals(true,result);
+        assertEquals(false,result);
     }
 
     @Test
@@ -71,7 +72,8 @@ class MTaxTest {
 
     @Test
     void getValidXTaxCreationDateTest() {
+        Date expectedDate=new Date(2017,8,12);
         Date result= mTax.getValidXTaxCreationDate(xTaxList,mTax.getXTaxHashMap(xt),1);
-        assertEquals(new Date(2017,8,12),result);
+        assertEquals(expectedDate,result);
     }
 }
