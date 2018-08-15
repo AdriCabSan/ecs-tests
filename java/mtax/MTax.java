@@ -32,7 +32,7 @@ public class MTax implements Constant {
                 validIds.add(tax.getId().toString());
             if(isXTaxNotValid(errorList, tax))
                 errorList.add("El impuesto no es un dato valido");
-            hasJustLocalTaxes = areLocalTaxesPresent(errorList, tax);
+            hasJustLocalTaxes = isLocalTaxPresent(errorList, tax);
         }
         return hasJustLocalTaxes;
     }
@@ -40,7 +40,7 @@ public class MTax implements Constant {
     protected static boolean isXTaxListNotValid(List<XTax> xTaxList, List<String> errorList) {
         boolean isXTaxListValid = xTaxList != null && xTaxList.size() > 0;
         if(!isXTaxListValid) {
-            errorList.add("El documento no tiene tasas");
+            errorList.add("El documento no tiene tasasis");
             return true;
         }
         return false;
@@ -61,18 +61,22 @@ public class MTax implements Constant {
         return isTaxPresent;
     }
 
-    protected static boolean areLocalTaxesPresent(List<String> errorList, XTax tax) {
+    protected static boolean isLocalTaxPresent(List<String> errorList, XTax tax) {
         boolean hasJustLocalTaxes = true;
-        boolean isTaxAmountPresent = tax.isTrasladado() && tax.getTaxAmount() == null;
         if(!tax.isLocal()){
             hasJustLocalTaxes=false;
             if(tax.getTaxAmount() == null )
                 errorList.add("El importe es obligatorio");
         }
-        else if(isTaxAmountPresent)
-            errorList.add("El importe es obligatorio");
+        else isLocalTaxAmountPresent(errorList,tax);
 
         return hasJustLocalTaxes;
+    }
+    protected  static boolean isLocalTaxAmountPresent(List<String> errorList, XTax tax){
+        boolean isTaxAmountPresent = tax.isTrasladado() && tax.getTaxAmount() == null;
+        if(isTaxAmountPresent)
+            errorList.add("El importe es obligatorio");
+        return isTaxAmountPresent;
     }
 
     private static void checkValidIds(List<XTax> xTaxList, List<String> errorList, List<String> validIds) {

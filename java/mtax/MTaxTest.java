@@ -37,7 +37,7 @@ class MTaxTest {
     @Test
     void areXTaxesValidTest() {
         boolean result= mTax.areXTaxesValid(xTaxList,errorList,validIds);
-        assertEquals(true,result);
+        assertEquals(false,result);
     }
 
     @Test
@@ -48,20 +48,26 @@ class MTaxTest {
 
     @Test
     void isXTaxNotValidTest() {
-        boolean result =mTax.isXTaxNotValid(errorList,taxCategoryList,new XTax());
+        boolean result =mTax.isXTaxNotValid(errorList,new XTax());
+        assertEquals(false,result);
+    }
+
+    @Test
+    void isXTaxEnteredTest() {
+        boolean result = mTax.isXTaxEntered(errorList,xTaxList.get(0));
         assertEquals(true,result);
     }
 
     @Test
-    void isXTaxNotEnteredTest() {
-        boolean result = mTax.isXTaxNotEntered(errorList,xTaxList.get(0));
-        assertEquals(true,result);
+    void isLocalTaxPresentTest() {
+        boolean result = mTax.isLocalTaxPresent(errorList,xTaxList.get(0));
+        assertEquals(false,result);
     }
 
     @Test
-    void areLocalTaxesPresentTest() {
-        boolean result = mTax.areLocalTaxesPresent(errorList,xTaxList.get(0));
-        assertEquals(true,result);
+    void isLocalTaxAmountPresentTest() {
+        boolean result = mTax.isLocalTaxAmountPresent(errorList,xTaxList.get(0));
+        assertEquals(false,result);
     }
 
     @Test
